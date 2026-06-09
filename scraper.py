@@ -1,4 +1,4 @@
-ֿimport requests
+import requests
 import os
 from datetime import date
 
@@ -60,3 +60,39 @@ def get_team_stats(home_team, away_team):
     except Exception as e:
         print(f"Stats error: {e}")
     return stats
+
+def get_injuries(home_team, away_team):
+    injuries = {"home": [], "away": []}
+    try:
+        # ESPN injuries API
+        for team, key in [(home_team, "home"), (away_team, "away")]:
+            url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/news"
+            params = {"limit": 50}
+            resp = requests.get(url, headers=HEADERS, params=params, timeout=10)
+            articles = resp.json().get("articles", [])
+            for a in articles:
+                headline = a.get("headline", "").lower()
+                if team.lower() in headline and any(word in headline for word in ["injur", "doubt", "miss", "out", "נפצע", "ספק", "פציעה"]):
+                    injuries[key].append(a["headline"])
+    except Exception as e:
+        print(f"Injuries error: {e}")
+
+    try:
+        # SofaScore injuries
+        search_url = f"https://www.sofascore.com/api/v1/team/search?q={home_team.replace(' ', '%20')}"
+        resp = requests.get(search_url, headers=HEADERS, timeout=10)
+        if resp.ok:
+            teams = resp.json().get("teams", [])
+            if teams:
+                team_id = teams[0]["id"]
+                inj_url = f"https://www.sofascore.com/api/v1/team/{team_id}/players/injured"
+                inj_resp = requests.get(inj_url, headers=HEADERS, timeout=10)
+                if inj_resp.ok:
+                    for player in inj_resp.json().get("players", []):
+                        name = player.get("player", {}).get("name", "")
+                        status = player.get("injuryType", "פציעה")
+                        injuries["home"].append(f"{name} - {status}")
+    except Exception as e:
+        print(f"SofaScore injury error: {e}")
+
+    return injuries

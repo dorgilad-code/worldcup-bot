@@ -4,7 +4,10 @@ import os
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-def analyze_match(match, stats, odds):
+def analyze_match(match, stats, odds, injuries={}):
+    home_injuries = injuries.get("home", [])
+    away_injuries = injuries.get("away", [])
+
     prompt = f"""
 אתה מנתח ספורט מקצועי המתמחה בהימורים על מונדיאל 2026.
 נתח את המשחק הבא על בסיס כל הנתונים שנאספו.
@@ -15,6 +18,9 @@ def analyze_match(match, stats, odds):
 
 כותרות ESPN:
 {json.dumps(stats.get('espn_headlines', []), ensure_ascii=False)}
+
+נפגעים {match['home']}: {json.dumps(home_injuries, ensure_ascii=False) if home_injuries else 'אין מידע'}
+נפגעים {match['away']}: {json.dumps(away_injuries, ensure_ascii=False) if away_injuries else 'אין מידע'}
 
 קווי הימורים:
 {json.dumps(odds, ensure_ascii=False)[:500]}
@@ -27,14 +33,17 @@ def analyze_match(match, stats, odds):
 ניתוח:
 [2-3 שורות על כוח הקבוצות]
 
+נפגעים וחסרים:
+[רשום את השחקנים החסרים וההשפעה על המשחק. אם אין מידע — כתוב אין מידע על נפגעים]
+
 תחזית תוצאה מדויקת:
-[למשל: ארגנטינה 2-1 צרפת]
+[למשל: ארגנטינה 2-1 צרפת והסבר קצר]
 
 טיפ מומלץ:
-[המלצה ספציפית]
+[המלצה ספציפית - 1X2 / Over/Under / BTTS]
 
 קומבו מומלץ:
-[שילוב שני טיפים]
+[שילוב שני טיפים עם מכפיל משוער]
 
 ערך בקו:
 [האם הקו נותן ערך?]
