@@ -1,7 +1,6 @@
-import requests
-from bs4 import BeautifulSoup
+ֿimport requests
 import os
-from datetime import date, timedelta
+from datetime import date
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -15,7 +14,7 @@ def get_todays_matches():
         params = {"status": "SCHEDULED"}
         resp = requests.get(url, headers=headers, params=params, timeout=10)
         data = resp.json()
-        today = (date.today() + timedelta(days=1)).isoformat()
+        today = date.today().isoformat()
         for match in data.get("matches", []):
             if match["utcDate"][:10] == today:
                 matches.append({
@@ -61,4 +60,3 @@ def get_team_stats(home_team, away_team):
     except Exception as e:
         print(f"Stats error: {e}")
     return stats
-    
