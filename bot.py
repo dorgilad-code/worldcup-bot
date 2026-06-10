@@ -53,6 +53,7 @@ async def send_top_scorer_analysis():
     )
     
     await bot.send_message(chat_id=CHAT_ID, text=message.content[0].text)
+    print("ניתוח מלך שערים נשלח!")
 
 async def send_daily_tips():
     print("מביא משחקי היום...")
@@ -80,4 +81,12 @@ async def send_daily_tips():
 
     await bot.send_message(
         chat_id=CHAT_ID,
-        text=f"סיכום: {len(matches)} משחקים נותחו\nהימ
+        text=f"סיכום: {len(matches)} משחקים נותחו\nהימורים אחראיים בלבד"
+    )
+
+async def main():
+    await send_top_scorer_analysis()
+    await send_daily_tips()
+
+if __name__ == "__main__":
+    asyncio.run(main())
